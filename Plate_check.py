@@ -1,75 +1,95 @@
-from itertools import combinations
+import numpy as np
+from sklearn.cluster import KMeans
+from scipy.stats import chi2_contingency
 
-#person 4 module...
-
-# Hamming distance
+# hamming
 def hamming_distance(s1,s2):
     if len(s1)!=len(s2):
         return float('inf')
     return sum(c1!=c2 for c1,c2 in zip(s1,s2))
 
-# Single plate check
-def check_single_plate(input_plate,database,threshold=1):
-    print("\nChecking plate:",input_plate)
+# kmeans
+def run_kmeans():
+    data=np.array([
+        [1,2],
+        [2,1],
+        [5,8],
+        [6,9],
+        [1,0],
+        [9,11]
+    ])
 
-    for db_plate in database:
-        dist=hamming_distance(input_plate,db_plate)
-        if dist<=threshold:
-            print("Suspicious! Similar to:",db_plate)
-            print("Difference:",dist)
-            return
+    kmeans=KMeans(n_clusters=2,random_state=0)
+    kmeans.fit(data)
 
-    print("No similar plate found (may be fake or new)")
+    print("Clusters:",kmeans.labels_)
+    print("Centers:",kmeans.cluster_centers_)
 
-# Bulk check
-def find_suspicious_plates(plates,threshold=1):
-    print("\nChecking suspicious plates in dataset...")
-
-    found=False
-    for p1,p2 in combinations(plates,2):
-        dist=hamming_distance(p1,p2)
-        if dist<=threshold:
-            print("Suspicious pair:",p1,"and",p2,"| Difference:",dist)
-            found=True
-
-    if not found:
-        print("No suspicious pairs found")
-
-# Main menu
-def main():
-    database=[
-        "DL01AB1234",
-        "DL02CD5678",
-        "UP03EF9012"
+# chi square
+def run_chi_square():
+    data=[
+        [10,20],
+        [20,20]
     ]
 
+    chi,p,_,_=chi2_contingency(data)
+
+    print("Chi value:",chi)
+    print("p-value:",p)
+
+    if p<0.05:
+        print("Suspicious")
+    else:
+        print("Normal")
+
+# hamming check
+def run_hamming():
+    p1=input("Enter plate 1: ")
+    p2=input("Enter plate 2: ")
+
+    dist=hamming_distance(p1,p2)
+
+    print("Distance:",dist)
+
+    if dist<=1:
+        print("Very similar (Suspicious)")
+    else:
+        print("Not similar")
+
+# ocr demo
+def ocr_demo():
+    img=input("Enter image name: ")
+    print("Reading plate...")
+    print("Detected: DL01AB1234")
+
+# main
+def main():
     while True:
-        print("\n==== MENU ====")
-        print("1. Check Single Plate")
-        print("2. Check Multiple Plates")
-        print("3. Exit")
+        print("\n1. K-Means")
+        print("2. Chi-Square")
+        print("3. Hamming Distance")
+        print("4. OCR Demo")
+        print("5. Exit")
 
-        choice=input("Enter choice: ")
+        ch=input("Enter choice: ")
 
-        if choice=="1":
-            plate=input("Enter number plate: ")
-            check_single_plate(plate,database)
+        if ch=="1":
+            run_kmeans()
 
-        elif choice=="2":
-            plates=[]
-            n=int(input("Enter number of plates: "))
-            for i in range(n):
-                p=input("Enter plate: ")
-                plates.append(p)
+        elif ch=="2":
+            run_chi_square()
 
-            find_suspicious_plates(plates)
+        elif ch=="3":
+            run_hamming()
 
-        elif choice=="3":
-            print("Exiting...")
+        elif ch=="4":
+            ocr_demo()
+
+        elif ch=="5":
             break
 
         else:
-            print("Invalid choice")
+            print("Invalid")
 
 if __name__=="__main__":
     main()
