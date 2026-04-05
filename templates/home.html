@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traffic Challan System</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1f4037, #99f2c8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    input {
+        width: 90%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 12px 20px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #43a047;
+    }
+
+    .result {
+        margin-top: 25px;
+        text-align: left;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        display: none;
+    }
+
+    .row {
+        margin: 8px 0;
+    }
+
+    .label {
+        font-weight: bold;
+        color: #444;
+    }
+
+    .success {
+        color: green;
+        font-weight: bold;
+    }
+
+    .error {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>🚦 Traffic Challan System</h2>
+
+    <input type="text" id="plateInput" placeholder="Enter Vehicle Number">
+    <br>
+    <button onclick="checkPlate()">Check</button>
+
+    <div class="result" id="resultBox">
+        <div class="row"><span class="label">Plate:</span> <span id="plate"></span></div>
+        <div class="row"><span class="label">Valid Format:</span> <span id="valid"></span></div>
+        <div class="row"><span class="label">Database:</span> <span id="db"></span></div>
+        <div class="row"><span class="label">Ownership:</span> <span id="owner"></span></div>
+        <div class="row"><span class="label">Similarity:</span> <span id="similar"></span></div>
+    </div>
+</div>
+
+<script>
+async function checkPlate() {
+    let plate = document.getElementById("plateInput").value;
+
+    if (!plate) {
+        alert("Enter vehicle number!");
+        return;
+    }
+
+    const res = await fetch("/api/full_check", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({plate: plate})
+    });
+
+    const data = await res.json();
+
+    document.getElementById("resultBox").style.display = "block";
+
+    document.getElementById("plate").innerText = data.plate;
+
+    document.getElementById("valid").innerHTML =
+        data.valid_format ? '<span class="success">Valid</span>' :
+                            '<span class="error">Invalid</span>';
+
+    document.getElementById("db").innerText =
+        data.search_result.found ? "Found in database" : "Not Found";
+
+    document.getElementById("owner").innerText =
+        data.ownership.suspicious ? "Suspicious Ownership" : "Normal";
+
+    document.getElementById("similar").innerText =
+        data.similarity.suspicious ? "Similar Plate Found" : "No Issues";
+}
+</script>
+
+</body>
+</html>

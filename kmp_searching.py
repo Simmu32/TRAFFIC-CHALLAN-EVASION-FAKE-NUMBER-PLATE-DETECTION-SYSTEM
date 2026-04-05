@@ -52,32 +52,15 @@ def kmp_search(text, pattern):
 # Step 3: Search Plate in Database
 # -------------------------------
 def search_plate_in_db(plate):
-    conn = sqlite3.connect("traffic_system.db")
-    cursor = conn.cursor()
+    database = [
+        "DL01AB1234",
+        "DL02CD5678",
+        "UP03EF9012"
+    ]
 
-    cursor.execute("SELECT plate_number, owner_name FROM RegisteredVehicles")
-    rows = cursor.fetchall()
-
-    for db_plate, owner in rows:
-        if kmp_search(db_plate, plate):
-            conn.close()
-            return {
-                "found": True,
-                "plate": db_plate,
-                "owner": owner
-            }
-
-    conn.close()
-    return {
-        "found": False,
-        "message": "Plate not found (possibly fake)"
-    }
+    if plate in database:
+        return {"found": True, "message": "Plate found in database"}
+    else:
+        return {"found": False, "message": "Plate not found"}
 
 
-# -------------------------------
-# Test
-# -------------------------------
-if __name__ == "__main__":
-    test_plate = "DL01AB1234"
-    result = search_plate_in_db(test_plate)
-    print(result)

@@ -1,7 +1,11 @@
 from flask import Flask, request, jsonify
 import sqlite3
 from sklearn.linear_model import LogisticRegression
-from lifelines import KaplanMeierFitter
+
+try:
+    from lifelines import KaplanMeierFitter
+except ImportError:
+    KaplanMeierFitter = None
 
 app = Flask(__name__)
 
@@ -133,7 +137,7 @@ def survival_analysis():
         durations.append(row[0])  # using fine as dummy time
         events.append(row[1])
 
-    if not durations:
+    if not durations or KaplanMeierFitter is None:
         return {}
 
     kmf = KaplanMeierFitter()

@@ -64,26 +64,30 @@ def bfs_traversal(start):
 # -------------------------------
 # Suspicious Detection
 # -------------------------------
+from collections import deque
+
 def check_suspicious(start):
-    people, vehicles = bfs_traversal(start)
-
-    suspicious = False
-
-    # Simple rule: if a person has more than 2 vehicles
-    if len(vehicles) > 2:
-        suspicious = True
-
-    return {
-        "connected_people": list(people),
-        "connected_vehicles": list(vehicles),
-        "suspicious": suspicious
+    graph = {
+        "DL01AB1234": ["Amit", "Rahul"],
+        "Rahul": ["Suresh"],
+        "DL02CD5678": ["Vikas"],
     }
 
+    visited = set()
+    queue = deque([start])
 
-# -------------------------------
-# Test
-# -------------------------------
-if __name__ == "__main__":
-    start_node = "Ramesh Kumar"   # try person name or plate
-    result = check_suspicious(start_node)
-    print(result)
+    while queue:
+        node = queue.popleft()
+        if node in visited:
+            continue
+        visited.add(node)
+
+        if node in graph:
+            for neighbor in graph[node]:
+                queue.append(neighbor)
+
+    if len(visited) > 3:
+        return {"suspicious": True, "chain": list(visited)}
+    else:
+        return {"suspicious": False, "chain": list(visited)}
+
